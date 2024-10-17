@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Wine API
+  version: 1.0.0
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Effettua il login
+      requestBody:
+        description: ID Token restituito da Google
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken:
+                  type: string
+                  example: "ID Token restituito da Google"
+      responses:
+        '200':
+          description: Login effettuato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT Token contenente dati utente compreso id google
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+        '404':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+
+  /api/v1/wines:
+    post:
+      summary: Aggiungi un nuovo vino manualmente
+      requestBody:
+        description: Dati del vino da aggiungere
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'  # Riferimento allo schema Wine
+      responses:
+        '200':
+          description: Vino aggiunto con successo
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+
+    get:
+      summary: Ottieni una lista di vini (con filtro opzionale per colore)
+      parameters:
+        - name: color
+          in: query
+          description: Filtra per colore del vino
+          required: false
+          schema:
+            type: string
+            example: "Rosso"
+      responses:
+        '200':
+          description: Lista di vini restituita con successo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine'  # Riferimento allo schema Wine
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+
+  /api/v1/wines/barcode:
+    post:
+      summary: Popola i dati del vino tramite il barcode
+      requestBody:
+        description: Richiesta di popolamento tramite barcode
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                barcode:
+                  type: string
+                  example: "123456789012"
+      responses:
+        '200':
+          description: Vino popolato correttamente
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+
+  /api/v1/wines/{id}:
+    put:
+      summary: Modifica un vino esistente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Dati aggiornati del vino
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'
+      responses:
+        '200':
+          description: Vino modificato con successo
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+        '404':
+          description: Vino non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Vino non presente"
+
+    delete:
+      summary: Elimina un vino esistente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Vino eliminato con successo
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Token non valido o scaduto."
+        '404':
+          description: Vino non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Vino non presente"
+
+components:
+  schemas:
+    Wine:
+      type: object
+      properties:
+        produttore:
+          type: string
+          example: "Cantina Sociale"
+        nomeVino:
+          type: string
+          example: "Chianti"
+        annata:
+          type: integer
+          example: 2018
+        colore:
+          type: string
+          description: Colore del vino (Es. Rosso, Bianco, Rosato)
+          example: "Rosso"
+        zonaProduzione:
+          type: string
+          example: "Toscana"
+        immaginePath:
+          type: string
+          example: "/path/to/image"
+        descrizione:
+          type: string
+          example: "Vino dal sapore fruttato"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        prezzo:
+          type: number
+          format: float
+          example: 12.99
+        barcode:
+          type: string
+          example: "123456789012"
