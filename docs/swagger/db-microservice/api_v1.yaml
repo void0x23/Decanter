@@ -1,0 +1,173 @@
+openapi: 3.0.0
+info:
+  title: Wine Database API
+  version: 1.0.0
+paths:
+  /api/v1/wines:
+    post:
+      summary: Add a new wine
+      requestBody:
+        description: Data of the wine to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'  # Reference to the Wine schema
+      responses:
+        '201':
+          description: Wine added successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid wine data."
+
+    get:
+      summary: Get a list of wines (optional filter by color)
+      parameters:
+        - name: color
+          in: query
+          description: Filter by wine color
+          required: false
+          schema:
+            type: string
+            example: "Red"
+      responses:
+        '200':
+          description: List of wines returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine'  # Reference to the Wine schema
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid query parameters."
+
+  /api/v1/wines/{id}:
+    put:
+      summary: Edit an existing wine
+      parameters:
+        - name: id
+          description: barcode
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Updated wine data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'
+      responses:
+        '200':
+          description: Wine updated successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid wine data."
+        '404':
+          description: Wine not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Wine not found."
+
+    delete:
+      summary: Delete an existing wine
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: barcode
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Wine deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid request."
+        '404':
+          description: Wine not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Wine not found."
+
+components:
+  schemas:
+    Wine:
+      type: object
+      properties:
+        producer:
+          type: string
+          example: "Cantina Sociale"
+        wine_name:
+          type: string
+          example: "Chianti"
+        vintage:
+          type: integer
+          example: 2018
+        color:
+          type: string
+          description: Wine color (e.g. Red, White, Rosé)
+          example: "Red"
+        production_area:
+          type: string
+          example: "Tuscany"
+        image_path:
+          type: string
+          example: "/path/to/image"
+        description:
+          type: string
+          example: "Wine with fruity flavors"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        price:
+          type: number
+          format: float
+          example: 12.99
+        barcode:
+          type: string
+          example: "123456789012"
+

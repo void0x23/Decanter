@@ -5,9 +5,9 @@ info:
 paths:
   /api/v1/auth/login:
     post:
-      summary: Effettua il login
+      summary: Log in
       requestBody:
-        description: ID Token restituito da Google
+        description: ID Token returned by Google
         required: true
         content:
           application/json:
@@ -16,10 +16,10 @@ paths:
               properties:
                 idToken:
                   type: string
-                  example: "ID Token restituito da Google"
+                  example: "ID Token returned by Google"
       responses:
         '200':
-          description: Login effettuato con successo
+          description: Login successful
           content:
             application/json:
               schema:
@@ -27,10 +27,10 @@ paths:
                 properties:
                   token:
                     type: string
-                    description: JWT Token contenente dati utente compreso id google
+                    description: JWT Token containing user data including Google ID
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -38,9 +38,9 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
         '404':
-          description: Utente non trovato
+          description: User not found
           content:
             application/json:
               schema:
@@ -52,19 +52,19 @@ paths:
 
   /api/v1/wines:
     post:
-      summary: Aggiungi un nuovo vino manualmente
+      summary: Add a new wine manually
       requestBody:
-        description: Dati del vino da aggiungere
+        description: Data of the wine to be added
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Wine'  # Riferimento allo schema Wine
+              $ref: '#/components/schemas/Wine'  # Reference to the Wine schema
       responses:
         '200':
-          description: Vino aggiunto con successo
+          description: Wine added successfully
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -72,29 +72,29 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
 
     get:
-      summary: Ottieni una lista di vini (con filtro opzionale per colore)
+      summary: Get a list of wines (optional filter by color)
       parameters:
         - name: color
           in: query
-          description: Filtra per colore del vino
+          description: Filter by wine color
           required: false
           schema:
             type: string
-            example: "Rosso"
+            example: "Red"
       responses:
         '200':
-          description: Lista di vini restituita con successo
+          description: List of wines returned successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Wine'  # Riferimento allo schema Wine
+                  $ref: '#/components/schemas/Wine'  # Reference to the Wine schema
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -102,13 +102,13 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
 
   /api/v1/wines/barcode:
     post:
-      summary: Popola i dati del vino tramite il barcode
+      summary: Populate wine data by barcode
       requestBody:
-        description: Richiesta di popolamento tramite barcode
+        description: Barcode-based wine data population request
         required: true
         content:
           application/json:
@@ -120,9 +120,9 @@ paths:
                   example: "123456789012"
       responses:
         '200':
-          description: Vino popolato correttamente
+          description: Wine data populated successfully
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -130,19 +130,20 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
 
   /api/v1/wines/{id}:
     put:
-      summary: Modifica un vino esistente
+      summary: Edit an existing wine
       parameters:
         - name: id
+          description: Wine barcode
           in: path
           required: true
           schema:
             type: integer
       requestBody:
-        description: Dati aggiornati del vino
+        description: Updated wine data
         required: true
         content:
           application/json:
@@ -150,9 +151,9 @@ paths:
               $ref: '#/components/schemas/Wine'
       responses:
         '200':
-          description: Vino modificato con successo
+          description: Wine updated successfully
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -160,9 +161,9 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
         '404':
-          description: Vino non trovato
+          description: Wine not found
           content:
             application/json:
               schema:
@@ -170,10 +171,10 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Vino non presente"
+                    example: "Wine not found"
 
     delete:
-      summary: Elimina un vino esistente
+      summary: Delete an existing wine
       parameters:
         - name: id
           in: path
@@ -182,9 +183,9 @@ paths:
             type: integer
       responses:
         '200':
-          description: Vino eliminato con successo
+          description: Wine deleted successfully
         '401':
-          description: Token non valido o scaduto
+          description: Invalid or expired token
           content:
             application/json:
               schema:
@@ -192,9 +193,9 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Token non valido o scaduto."
+                    example: "Invalid or expired token."
         '404':
-          description: Vino non trovato
+          description: Wine not found
           content:
             application/json:
               schema:
@@ -202,44 +203,45 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Vino non presente"
+                    example: "Wine not found"
 
 components:
   schemas:
     Wine:
       type: object
       properties:
-        produttore:
+        producer:
           type: string
           example: "Cantina Sociale"
-        nomeVino:
+        wine_name:
           type: string
           example: "Chianti"
-        annata:
+        vintage:
           type: integer
           example: 2018
-        colore:
+        color:
           type: string
-          description: Colore del vino (Es. Rosso, Bianco, Rosato)
-          example: "Rosso"
-        zonaProduzione:
+          description: Wine color (e.g. Red, White, Rosé)
+          example: "Red"
+        production_area:
           type: string
-          example: "Toscana"
-        immaginePath:
+          example: "Tuscany"
+        image_path:
           type: string
           example: "/path/to/image"
-        descrizione:
+        description:
           type: string
-          example: "Vino dal sapore fruttato"
+          example: "Wine with fruity flavors"
         rating:
           type: integer
           minimum: 1
           maximum: 5
           example: 4
-        prezzo:
+        price:
           type: number
           format: float
           example: 12.99
         barcode:
           type: string
           example: "123456789012"
+

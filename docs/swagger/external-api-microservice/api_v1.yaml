@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Wine API
+  version: 1.0.0
+paths:
+  /api/v1/openfoodfacts/barcode:
+    post:
+      summary: Request data from OpenFoodFacts public API and populate the database
+      requestBody:
+        description: Barcode-based wine data population request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                barcode:
+                  type: string
+                  example: "123456789012"
+      responses:
+        '200':
+          description: Wine data populated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'  # Reference to the Wine schema
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid or expired token."
+components:
+  schemas:
+    Wine:
+      type: object
+      properties:
+        producer:
+          type: string
+          example: "Cantina Sociale"
+        wine_name:
+          type: string
+          example: "Chianti"
+        vintage:
+          type: integer
+          example: 2018
+        color:
+          type: string
+          description: Wine color (e.g., Red, White, Rosé)
+          example: "Red"
+        production_area:
+          type: string
+          example: "Tuscany"
+        image_path:
+          type: string
+          example: "/path/to/image"
+        description:
+          type: string
+          example: "A fruity wine"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        price:
+          type: number
+          format: float
+          example: 12.99
+        barcode:
+          type: string
+          example: "123456789012"
+

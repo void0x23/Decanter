@@ -26,3 +26,5 @@ replay_pid*
 backend/.idea
 .idea
 frontend/.idea
+docs/.idea
+*/.idea
