@@ -1,25 +1,30 @@
 # Login Flow with Google
 
 ```mermaid
-sequenceDiagram
+
 User->>Frontend: Clicks "Sign in with Google"
-Frontend->>Google: Authentication request (client_id, scope, redirect_uri)
+Frontend->>Google: Authentication request (client_id, scope)
 Google-->>User: Displays login screen
 User->>Google: Enters credentials and confirms
-Google-->>Frontend: Redirects to redirect_uri (authorization code)
+Google-->>Frontend: Returns ID Token
 
-Frontend->>Backend: Sends authorization_code
-Backend->>Google: Token request (authorization code)
-Google-->>Backend: Returns id_token and access_token
-Backend->>Backend: Decodes id_token and verifies user
-Backend->>Database: Checks if user exists
+Frontend->>Backend: Sends ID Token to /auth/login
+Backend->>Google: Verifies ID Token with Google
+Google-->>Backend: Returns user info (if token is valid)
+
+Backend->>Microservice: Sends user info for verification
+Microservice->>Database: Checks if user exists
 alt Existing user
-Database-->>Backend: Returns user data
+Database-->>Microservice: Returns existing user data
+Microservice-->>Backend: Returns user data
 else Non-existing user
-Backend->>Database: Creates new user
-Database-->>Backend: Confirms creation
-Backend-->>Frontend: Returns user data
+Microservice->>Database: Creates new user
+Database-->>Microservice: Confirms user creation
+Microservice-->>Backend: Returns new user data
 end
-Backend-->>Frontend: Returns user data
+
+Backend-->>Frontend: Returns user data and JWT
 Frontend-->>User: Displays authenticated user interface
 
+
+```
