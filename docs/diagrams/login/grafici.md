@@ -1,7 +1,7 @@
 # Login Flow with Google
 
 ```mermaid
-
+sequenceDiagram
 User->>Frontend: Clicks "Sign in with Google"
 Frontend->>Google: Authentication request (client_id, scope)
 Google-->>User: Displays login screen
