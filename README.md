@@ -1,2 +1,2 @@
-# decanter
-Decanter app
+# Decanter
+Work in progress
