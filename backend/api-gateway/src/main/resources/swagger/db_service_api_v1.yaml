@@ -3,6 +3,43 @@ info:
   title: Wine Database API
   version: 1.0.0
 paths:
+  /api/v1/users:
+    post:
+      summary: Get or create a user
+      requestBody:
+        description: User identification data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'  # Reference to the User schema
+
+      responses:
+        '200':
+          description: User information returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'  # Reference to the User schema
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'  # Reference to the User schema
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'  # Reference to the BadRequestError schema
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'  # Reference to the InternalServerError schema
+
   /api/v1/wines:
     post:
       summary: Add a new wine
@@ -16,16 +53,16 @@ paths:
       responses:
         '201':
           description: Wine added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'  # Return the added wine
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid wine data."
+                $ref: '#/components/schemas/BadRequestError'  # Reference to the BadRequestError schema
 
     get:
       summary: Get a list of wines (optional filter by color)
@@ -51,22 +88,18 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid query parameters."
+                $ref: '#/components/schemas/BadRequestError'  # Reference to the BadRequestError schema
 
   /api/v1/wines/{id}:
     put:
       summary: Edit an existing wine
       parameters:
         - name: id
-          description: barcode
+          description: Barcode of the wine
           in: path
           required: true
           schema:
-            type: integer
+            type: string  # Modificato per riflettere che è un barcode
       requestBody:
         description: Updated wine data
         required: true
@@ -77,26 +110,22 @@ paths:
       responses:
         '200':
           description: Wine updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'  # Return the updated wine
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid wine data."
+                $ref: '#/components/schemas/BadRequestError'  # Reference to the BadRequestError schema
         '404':
           description: Wine not found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Wine not found."
+                $ref: '#/components/schemas/NotFoundError'  # Reference to the NotFoundError schema
 
     delete:
       summary: Delete an existing wine
@@ -104,9 +133,9 @@ paths:
         - name: id
           in: path
           required: true
-          description: barcode
+          description: Barcode of the wine
           schema:
-            type: integer
+            type: string  # Modificato per riflettere che è un barcode
       responses:
         '204':
           description: Wine deleted successfully
@@ -115,24 +144,29 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid request."
+                $ref: '#/components/schemas/BadRequestError'  # Reference to the BadRequestError schema
         '404':
           description: Wine not found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Wine not found."
+                $ref: '#/components/schemas/NotFoundError'  # Reference to the NotFoundError schema
 
 components:
   schemas:
+    User:
+      type: object
+      properties:
+        googleId:
+          type: string
+          example: "some-google-id"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john.doe@example.com"
+
     Wine:
       type: object
       properties:
@@ -171,3 +205,23 @@ components:
           type: string
           example: "123456789012"
 
+    BadRequestError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid user data."  # Example error message for bad requests
+
+    InternalServerError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal server error."  # Example error message for internal server errors
+
+    NotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Wine not found."  # Example error message for not found resources

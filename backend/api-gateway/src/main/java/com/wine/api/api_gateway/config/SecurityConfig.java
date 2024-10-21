@@ -24,16 +24,13 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable());
 
-        http.authorizeHttpRequests(authorizeHttpRequest -> authorizeHttpRequest
-                .requestMatchers("/api/v1/auth/login","/actuator/health", "/actuator/metrics", "/actuator/metrics/**","/api/monitor/**").permitAll()
-                .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
-
-        http.requiresChannel((channel) -> channel.anyRequest().requiresSecure());
-        return http.build();
+        return http.authorizeHttpRequests(authorizeHttpRequest -> authorizeHttpRequest
+                        .requestMatchers("/auth/login", "/api/v1/auth/login", "/actuator/health", "/actuator/metrics", "/actuator/metrics/**", "/api/monitor/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
 }

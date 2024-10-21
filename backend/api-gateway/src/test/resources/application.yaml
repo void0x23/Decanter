@@ -17,7 +17,7 @@ jwt:
 services:
   api:
     db:
-      url: 'http://localhost:8082/api/v1/users'
+      url: 'http://localhost:8080'
 
 logging:
   level:

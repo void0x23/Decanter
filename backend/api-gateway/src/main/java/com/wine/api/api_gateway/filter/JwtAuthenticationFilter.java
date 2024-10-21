@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -23,6 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        log.info("Request uri {}", request.getRequestURI());
+
+        if (isPermittedUri(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        log.info("Starting jwt filter");
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
@@ -53,6 +64,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         }
+    }
 
+    private boolean isPermittedUri(String uri) {
+        return uri.equals("/auth/login") ||
+                uri.equals("/api/v1/auth/login") ||
+                uri.equals("/actuator/health") ||
+                uri.equals("/actuator/metrics") ||
+                uri.startsWith("/actuator/metrics/") ||
+                uri.startsWith("/api/monitor/");
     }
 }
