@@ -37,10 +37,13 @@ public class JwtAuthService {
                     .verifyWith(jwtUtil.getSignInKey(signatureKey))
                     .build()
                     .parseSignedClaims(token);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new RuntimeException("Invalid JWT token", e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid JWT token: The token is null or improperly formatted.", e);
+        } catch (JwtException e) {
+            throw new JwtException("Invalid JWT token: The token may be expired or invalid.", e);
         }
     }
+
 
     public String extractUserEmail(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -49,6 +52,10 @@ public class JwtAuthService {
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Jws<Claims> claims = extractAllClaims(token);
         return claimsResolver.apply(claims.getPayload());
+    }
+
+    public String createJwtToken(String googleId, String name, String email) {
+        return jwtUtil.createJwtToken(googleId, name, email, signatureKey);
     }
 
 

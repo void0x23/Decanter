@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wine.api.api_gateway.invoker.ApiException;
-import com.wine.api.api_gateway.model.LoginRequest;
+import com.wine.api.api_gateway.model.auth.AuthResponse;
+import com.wine.api.api_gateway.model.auth.LoginRequest;
 import com.wine.api.api_gateway.model.User;
 import com.wine.api.api_gateway.service.DatabaseService;
 import com.wine.api.api_gateway.service.GoogleService;
+import com.wine.api.api_gateway.service.JwtAuthService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,11 @@ public class AuthController {
     @Autowired
     private DatabaseService databaseService;
 
+    @Autowired
+    private JwtAuthService jwtAuthService;
+
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) throws ApiException, JsonProcessingException {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginRequest) throws ApiException, JsonProcessingException {
 
         //test
         log.info("Login request {}", loginRequest.toString());
@@ -41,14 +46,28 @@ public class AuthController {
         String idToken = loginRequest.getGoogleIdToken();
         String response = googleService.authenticateUser(idToken);
 
+        if (response == null) {
+            throw new ApiException("Authentication failed: no response from Google service");
+        }
+
         //test
         log.info("Google auth response {}", response);
 
         User user = databaseService.retrieveOrCreateUserById(createUserFromGoogleResponse(response));
 
+        if (user == null) {
+            throw new ApiException("Failed retrieving user, user is null");
+        }
+
         log.info("Logged in user {}", user);
 
-        return ResponseEntity.ok("Successful login");
+        String jwt = jwtAuthService.createJwtToken(user.getGoogleId(), user.getName(), user.getEmail());
+
+        log.info("Jwt created {}", jwt);
+
+
+
+        return ResponseEntity.ok(new AuthResponse(jwt));
     }
 
 

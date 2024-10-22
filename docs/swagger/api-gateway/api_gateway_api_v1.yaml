@@ -217,48 +217,7 @@ paths:
                     type: string
                     example: "Wine not found"
 
-  /api/v1/users:
-    post:
-      summary: Get or create a user
-      requestBody:
-        description: User identification data
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                googleId:
-                  type: string
-                  example: "some-google-id"
-      responses:
-        '200':
-          description: User information returned successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  googleId:
-                    type: string
-                    example: "some-google-id"
-                  name:
-                    type: string
-                    example: "John Doe"
-                  email:
-                    type: string
-                    example: "john.doe@example.com"
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid user data."
-
+  
 components:
   schemas:
     Wine:

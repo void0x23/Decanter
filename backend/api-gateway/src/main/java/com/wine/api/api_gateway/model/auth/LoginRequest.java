@@ -1,4 +1,4 @@
-package com.wine.api.api_gateway.model;
+package com.wine.api.api_gateway.model.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
