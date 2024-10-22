@@ -16,12 +16,12 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.client.RestTemplate;
-import org.mockserver.model.HttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.mockserver.model.HttpRequest;
+import org.springframework.web.client.RestTemplate;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,10 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerTests {
 
 	@Autowired
-	private RestTemplate restTemplate;
+	private MockMvc mockMvc;
 
 	@Autowired
-	private MockMvc mockMvc;
+	private RestTemplate restTemplate;
 
 	private ClientAndServer mockServer;
 
@@ -43,13 +43,11 @@ class AuthControllerTests {
 	@BeforeEach
 	public void before() throws JsonProcessingException {
 		mockServer = ClientAndServer.startClientAndServer(8080);
-
 		user = new User();
 		user.setGoogleId("114021747576667478292");
 		user.setName("Adriano Pace");
 		user.setEmail("paceadrianolavoro@gmail.com");
-		ObjectMapper objectMapper = new ObjectMapper();
-		jsonBody = objectMapper.writeValueAsString(user);
+		jsonBody = new ObjectMapper().writeValueAsString(user);
 	}
 
 	private void setupMockResponse(String requestPath, int responseStatusCode, String responseBody) {
@@ -65,6 +63,18 @@ class AuthControllerTests {
 		);
 	}
 
+	private void setupGetMockResponse(String requestPath, String queryString, int responseStatusCode, String responseBody) {
+		mockServer.when(
+				HttpRequest.request()
+						.withMethod("GET")
+						.withPath(requestPath)
+						.withQueryStringParameter("id_token", queryString)
+		).respond(
+				HttpResponse.response()
+						.withStatusCode(responseStatusCode)
+						.withBody(responseBody)
+		);
+	}
 
 	@Test
 	void authLoginResponseOK() throws Exception {
@@ -85,20 +95,11 @@ class AuthControllerTests {
 				"}";
 
 		setupMockResponse("/api/v1/users", 200, jsonBody);
-
-		mockServer.when(
-				HttpRequest.request()
-						.withMethod("GET")
-						.withPath("/tokeninfo")
-						.withQueryStringParameter("id_token", GOOGLE_ID_TOKEN)
-		).respond(
-				HttpResponse.response()
-						.withStatusCode(200)
-						.withBody(googleTokenInfoResponse)
-		);
+		setupGetMockResponse("/tokeninfo", GOOGLE_ID_TOKEN, 200, googleTokenInfoResponse);
 
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setGoogleIdToken(GOOGLE_ID_TOKEN);
+
 		mockMvc.perform(MockMvcRequestBuilders.post("/auth/login")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"googleIdToken\": \"" + loginRequest.getGoogleIdToken() + "\"}"))
@@ -106,36 +107,24 @@ class AuthControllerTests {
 				.andExpect(jsonPath("$.token").exists());
 	}
 
-/*
 	@Test
 	void authLoginResponseBadRequest() throws Exception {
-
 		String errorResponse = "{\n" +
 				"  \"error\": \"invalid_token\",\n" +
 				"  \"error_description\": \"Invalid Value\"\n" +
 				"}";
 
 		setupMockResponse("/api/v1/users", 200, jsonBody);
-
-		mockServer.when(
-				HttpRequest.request()
-						.withMethod("GET")
-						.withPath("/tokeninfo")
-						.withQueryStringParameter("id_token", GOOGLE_ID_TOKEN)
-		).respond(
-				HttpResponse.response()
-						.withStatusCode(400)
-						.withBody(errorResponse)
-		);
+		setupGetMockResponse("/tokeninfo", GOOGLE_ID_TOKEN, 400, errorResponse);
 
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setGoogleIdToken(GOOGLE_ID_TOKEN);
+
 		mockMvc.perform(MockMvcRequestBuilders.post("/auth/login")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"googleIdToken\": \"" + loginRequest.getGoogleIdToken() + "\"}"))
 				.andExpect(status().isBadRequest());
 	}
-
 
 	@Test
 	void databaseServiceResponseOK() {
@@ -153,7 +142,6 @@ class AuthControllerTests {
 			assertThat(r).contains("email");
 		});
 	}
-*/
 
 	@AfterEach
 	void stopServer() {
