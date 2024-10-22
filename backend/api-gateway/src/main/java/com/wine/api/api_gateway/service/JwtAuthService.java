@@ -33,10 +33,12 @@ public class JwtAuthService {
 
     public Jws<Claims> extractAllClaims(String token) {
         try {
+
             return Jwts.parser()
                     .verifyWith(jwtUtil.getSignInKey(signatureKey))
                     .build()
                     .parseSignedClaims(token);
+
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid JWT token: The token is null or improperly formatted.", e);
         } catch (JwtException e) {
